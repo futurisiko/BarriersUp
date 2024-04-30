@@ -155,7 +155,9 @@ sudo chmod +x BarriersUp.py
 sudo cp BarriersUp.py /usr/local/bin/BarriersUp
 sudo BarriersUp
 ```
-
+## SNORT VARIANT
+This is an update version that implements also some useful snort's commands/integrations.
+Need to have snort installed (v2) and ```snort.conf``` + rules folder in ```/etc/snort/```.
 
 
 
