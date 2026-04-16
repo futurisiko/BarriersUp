@@ -1,0 +1,8 @@
+# Fail2Ban filter for failure attempts in Counter Strike-1.6
+#
+#
+
+[Definition]
+failregex = ^.*Scan from: \[[^]]+\] \(<HOST>\) protocol: \[[^]]+\] port: \[[^]]+\] type: \[[^]]+\] IP opts: \[[^]]+\] ignored: \[false\] triggered: \[true\].*$
+ignoreregex =
+datepattern = ^%%Y-%%m-%%dT%%H:%%M:%%S(?:\.%%f)?(?:%%z)?
