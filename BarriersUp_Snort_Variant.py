@@ -285,7 +285,7 @@ portsentry_process = "portsentry"
 portsentry_fail2ban_rule = """
 [portsentry]
 enabled = true
-logpath = /var/lib/portsentry/portsentry.history
+logpath = /var/log/portsentry.log
 maxretry = 1
 bantime = 3600
 chain = fail2banPortsentry
@@ -295,19 +295,17 @@ backend = polling
 # bash commands to start Portsentry
 portsentry_start_commands = """
 echo " - Portsentry setup"
-rm -rf /var/lib/portsentry/portsentry.history
-touch /var/lib/portsentry/portsentry.history
+rm -rf /var/log/portsentry.log
+touch /var/log/portsentry.log
 echo " - Setting Portsentry in Logging ONLY mode"
 ln -sf /dev/null /var/lib/portsentry/portsentry.blocked.stcp
 ln -sf /dev/null /var/lib/portsentry/portsentry.blocked.sudp
 ln -sf /dev/null /var/lib/portsentry/portsentry.blocked.tcp
 ln -sf /dev/null /var/lib/portsentry/portsentry.blocked.udp
-echo " - Setting Portsentry in Stealth Mode"
-sed -i 's/TCP_MODE="tcp"/TCP_MODE="stcp"/' /etc/default/portsentry
-sed -i 's/UDP_MODE="udp"/UDP_MODE="sudp"/' /etc/default/portsentry
-echo " "
-systemctl start portsentry.service 
-systemctl restart portsentry.service 
+mkdir -p /etc/systemd/system/portsentry.service.d
+if [ -f /etc/systemd/system/portsentry.service.d/override.conf ] && grep -Fxq "ExecStart=/usr/sbin/portsentry --stealth -i ALL" /etc/systemd/system/portsentry.service.d/override.conf; then echo "Override present"; else : > /etc/systemd/system/portsentry.service.d/override.conf && echo "[Service]" >> /etc/systemd/system/portsentry.service.d/override.conf && echo "ExecStart=" >> /etc/systemd/system/portsentry.service.d/override.conf && echo "ExecStart=/usr/sbin/portsentry --stealth -i ALL" >> /etc/systemd/system/portsentry.service.d/override.conf && systemctl daemon-reload && echo "Override applied"; fi
+systemctl start portsentry.service
+systemctl restart portsentry.service
 systemctl status portsentry.service
 """
 
@@ -318,15 +316,15 @@ systemctl status portsentry.service
 """
 
 # bash commands to print, organize and sort full offender list
-portsentry_check_full_offender = """
+portsentry_check_full_offender = r"""
 echo " - Full list sorted by attempts:"
-cat /var/lib/portsentry/portsentry.history | cut -d " " -f 2,6,8 | sort | uniq -c | sort -nr |  sed 's/     //'
+sed -n 's/.*Scan from: \[[^]]*\] (\([^)]*\)).*protocol: \[\([^]]*\)\].*port: \[\([^]]*\)\].*/\1 \2 \3/p' /var/log/portsentry.log | sort | uniq -c | sort -nr
 """
 
 # view full list
-portsentry_check_top5_offender = """
+portsentry_check_top5_offender = r"""
 echo " - Top 5 list sorted by attempts:"
-cat /var/lib/portsentry/portsentry.history | cut -d " " -f 2,6 | cut -d "/" -f 1 | sort | uniq -c | sort -nr | head -n 5 |  sed 's/     //'
+sed -n 's/.*Scan from: \[[^]]*\] (\([^)]*\)).*protocol: \[\([^]]*\)\].*port: \[\([^]]*\)\].*/\1 \2 \3/p' /var/log/portsentry.log | sort | uniq -c | sort -nr | head -n 5
 """
 
 # snort process variable
