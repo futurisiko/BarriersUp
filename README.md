@@ -158,6 +158,8 @@ sudo BarriersUp
 ## SNORT VARIANT
 This is an update version that implements also some useful snort's commands/integrations.
 Need to have snort installed (v2) and ```snort.conf``` + rules folder in ```/etc/snort/```.
+### UPDATE FOR PORTSENTRY V2
+Update the fail2ban filter with the one listed to let it work correctly with the new v2 of portsentry
 
 
 
